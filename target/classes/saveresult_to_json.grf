@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><Graph __version="3.5.0" author="broeder" created="Tue Jan 06 17:08:42 EST 2015" description="SaveResult To JSON" guiVersion="3.4.4.P" id="1420585953612" licenseCode="Unlicensed" licenseType="Unknown" modified="Tue Jan 06 17:08:42 EST 2015" modifiedBy="broeder" name="SaveResult_To_JSON" revision="1.0" showComponentDetails="false">
+<Global>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/object/errors" _dataStructure="SINGLE_DIMENSIONAL_COLLECTION" _id="__id" _metadataParentId="6b414fe4-4502-4969-bf1c-1ed32e8ffc86" _parent_id="__parent_id" _type="Input" id="9b0d9b44-364b-415a-873c-9caabbff5502">
+<Record fieldDelimiter="," name="errors" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __artificialType="_parent_id" __systemManaged="true" name="__parent_id" type="string"/>
+<Field __index="0" __sourcePath="{}/object/errors/fields" containerType="list" label="fields" name="fields" type="string"/>
+<Field __index="1" __sourcePath="{}/object/errors/message" containerType="SINGLE" label="message" name="message" type="string"/>
+<Field __index="2" __sourcePath="{}/object/errors/statusCode" containerType="SINGLE" label="statusCode" name="statusCode" type="string"/>
+</Record>
+</Metadata>
+<Metadata __index="2" __referenceCounter="1" __sourcePath="{}/object/errors" _dataStructure="SINGLE_DIMENSIONAL_COLLECTION" _id="__id" _metadataParentId="36636f02-c81f-4776-b1d2-e1a3f1ed6643" _parent_id="__parent_id" _type="Output" id="f377465b-48e1-4edd-aa6a-7e3147d50f2a">
+<Record fieldDelimiter="," name="errors" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __artificialType="_parent_id" __systemManaged="true" name="__parent_id" type="string"/>
+<Field __index="2" __sourcePath="{}/object/errors/fields" containerType="list" label="fields" name="fields" type="string"/>
+<Field __index="3" __sourcePath="{}/object/errors/message" containerType="SINGLE" label="message" name="message" type="string"/>
+<Field __index="4" __sourcePath="{}/object/errors/statusCode" containerType="SINGLE" label="statusCode" name="statusCode" type="string"/>
+</Record>
+</Metadata>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/object" _dataStructure="OBJECT" _id="__id" _type="Output" id="36636f02-c81f-4776-b1d2-e1a3f1ed6643">
+<Record fieldDelimiter="," name="object" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __index="0" __sourcePath="{}/object/id" containerType="SINGLE" label="id" name="id" type="string"/>
+<Field __index="1" __sourcePath="{}/object/success" containerType="SINGLE" label="success" name="success" type="boolean"/>
+<Field __sourcePath="{}/object/originalObject" containerType="SINGLE" label="originalObject" name="originalObject" type="string"/>
+</Record>
+</Metadata>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/object" _dataStructure="OBJECT" _id="__id" _type="Input" id="6b414fe4-4502-4969-bf1c-1ed32e8ffc86">
+<Record fieldDelimiter="," name="SaveResult" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __index="3" __sourcePath="{}/object/id" containerType="SINGLE" label="id" name="id" type="string"/>
+<Field __index="4" __sourcePath="{}/object/success" containerType="SINGLE" label="success" name="success" type="boolean"/>
+</Record>
+</Metadata>
+<Dictionary>
+<Entry id="DictionaryEntry0" input="true" name="inputPayload" output="false" type="object"/>
+<Entry id="DictionaryEntry1" input="false" name="outputPayload" output="true" type="object"/>
+<Entry dictval.__javaType="java.lang.String" id="DictionaryEntry2" input="true" name="originalObject" output="false" type="string"/>
+</Dictionary>
+</Global>
+<Phase number="0">
+<Node enabled="enabled" fileURL="dict:inputPayload" guiName="Pojo READER" guiX="20" guiY="20" id="BEAN_READER0" type="BEAN_READER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Context outPort="0" sequenceField="__id" xpath=".">
+  <Mapping cloverField="id" trim="true" xpath="id"/>
+  <Mapping cloverField="success" trim="true" xpath="success"/>
+  <Context generatedKey="__parent_id" outPort="1" parentKey="__id" sequenceField="__id" xpath="errors">
+    <Mapping cloverField="fields" trim="true" xpath="fields"/>
+    <Mapping cloverField="message" trim="true" xpath="message"/>
+    <Mapping cloverField="statusCode" trim="true" xpath="statusCode"/>
+  </Context>
+</Context>
+]]></attr>
+<attr name="_data_format"><![CDATA[JAVA]]></attr>
+<attr name="schema"><![CDATA[<?xml version="1.0" encoding="UTF-8"?><schema-object>
+  <typed-object-ref type-ref="com.sforce.soap.partner.SaveResult"/>
+  <typed-object type="com.sforce.soap.partner.StatusCode"/>
+  <typed-object type="java.lang.String"/>
+  <typed-object type="com.sforce.soap.partner.Error">
+    <schema-collection array="true" name="fields">
+      <typed-object-ref type-ref="java.lang.String"/>
+    </schema-collection>
+    <typed-object-ref name="message" type-ref="java.lang.String"/>
+    <typed-object-ref name="statusCode" type-ref="com.sforce.soap.partner.StatusCode"/>
+  </typed-object>
+  <typed-object type="boolean"/>
+  <typed-object type="com.sforce.soap.partner.SaveResult">
+    <schema-collection array="true" name="errors">
+      <typed-object-ref type-ref="com.sforce.soap.partner.Error"/>
+    </schema-collection>
+    <typed-object-ref name="id" type-ref="java.lang.String"/>
+    <typed-object-ref name="success" type-ref="boolean"/>
+  </typed-object>
+</schema-object>
+]]></attr>
+<attr name="__metadata"><![CDATA[true]]></attr>
+</Node>
+<Node enabled="enabled" guiName="Foreach 'errors' -&gt; 'errors'" guiX="460" guiY="120" id="FOREACH_ERRORS_ERRORS" transformClass="com.mulesoft.datamapper.transform.MelRecordTransform" type="REFORMAT">
+<attr name="melScript"><![CDATA[//MEL
+//START -> DO NOT REMOVE
+output.__id = input.__id;
+output.__parent_id = input.__parent_id;
+//END -> DO NOT REMOVE
+output.fields = input.fields;
+output.message = input.message;
+output.statusCode = input.statusCode;
+]]></attr>
+</Node>
+<Node enabled="enabled" guiName="Foreach 'object' -&gt; 'object'" guiX="460" guiY="20" id="FOREACH_OBJECT_OBJECT" transformClass="com.mulesoft.datamapper.transform.MelRecordTransform" type="REFORMAT">
+<attr name="melScript"><![CDATA[//MEL
+//START -> DO NOT REMOVE
+output.__id = input.__id;
+//END -> DO NOT REMOVE
+output.id = input.id;
+output.success = input.success;
+output.originalObject = if (input.success == false) {inputArguments.originalObject};]]></attr>
+</Node>
+<Node cacheInMemory="true" charset="UTF-8" enabled="enabled" fileURL="dict:outputPayload" guiName="JSON WRITER" guiX="900" guiY="20" id="JSON_WRITER0" type="JSON_WRITER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<object xmlns:clover="http://www.cloveretl.com/ns/xmlmapping" clover:inPort="0">
+  <id>$0.id</id>
+  <success>$0.success</success>
+  <clover:collection clover:name="errors">
+    <item clover:inPort="1" clover:key="__parent_id" clover:parentKey="__id">
+      <clover:collection clover:name="fields">$1.fields</clover:collection>
+      <message>$1.message</message>
+      <statusCode>$1.statusCode</statusCode>
+    </item>
+  </clover:collection>
+  <originalObject>$0.originalObject</originalObject>
+</object>]]></attr>
+<attr name="__isJsonSchema"><![CDATA[false]]></attr>
+<attr name="_data_format"><![CDATA[JSON]]></attr>
+</Node>
+<Edge debugMode="true" fromNode="BEAN_READER0:0" guiBendpoints="" id="Edge0" inPort="Port 0 (in)" metadata="6b414fe4-4502-4969-bf1c-1ed32e8ffc86" outPort="Port 0 (out)" toNode="FOREACH_OBJECT_OBJECT:0"/>
+<Edge debugMode="true" fromNode="BEAN_READER0:1" guiBendpoints="" id="Edge2" inPort="Port 0 (in)" metadata="9b0d9b44-364b-415a-873c-9caabbff5502" outPort="Port 1 (out)" toNode="FOREACH_ERRORS_ERRORS:0"/>
+<Edge debugMode="true" fromNode="FOREACH_ERRORS_ERRORS:0" guiBendpoints="" id="Edge3" inPort="Port 1 (in)" metadata="f377465b-48e1-4edd-aa6a-7e3147d50f2a" outPort="Port 0 (out)" toNode="JSON_WRITER0:1"/>
+<Edge debugMode="true" fromNode="FOREACH_OBJECT_OBJECT:0" guiBendpoints="" id="Edge1" inPort="Port 0 (in)" metadata="36636f02-c81f-4776-b1d2-e1a3f1ed6643" outPort="Port 0 (out)" toNode="JSON_WRITER0:0"/>
+</Phase>
+</Graph>

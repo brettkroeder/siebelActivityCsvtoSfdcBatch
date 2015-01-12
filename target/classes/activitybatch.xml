@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.5.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd">
+    <data-mapper:config name="CSV_To_List_Event_" transformationGraphPath="csv_to_list_event_.grf" doc:name="CSV_To_List_Event_"/>
+    <data-mapper:config name="List_Event__To_CSV" transformationGraphPath="list_event__to_csv.grf" doc:name="List_Event__To_CSV"/>
+    <byte-array-to-string-transformer name="Byte_Array_to_String" doc:name="Byte Array to String"/>
+    <sfdc:config name="Salesforce" username="${sfdc.a.username}" password="${sfdc.a.password}" securityToken="${sfdc.a.securityToken}" url="${sfdc.a.url}" doc:name="Salesforce"/>
+    <batch:job name="processActivityBatch">
+        <batch:threading-profile poolExhaustedAction="WAIT"/>
+        <batch:input>
+            <file:inbound-endpoint responseTimeout="10000" doc:name="File" moveToDirectory="/opt/files/moveto" path="/opt/files/input" pollingFrequency="15000">
+            	<file:filename-wildcard-filter pattern="*activity*.csv"></file:filename-wildcard-filter>
+            </file:inbound-endpoint><data-mapper:transform config-ref="CSV_To_List_Event_" doc:name="CSV To List&lt;Event&gt;"/>
+            <logger message="Processing #[payload.size()] records" level="INFO" doc:name="Logger"/>
+        </batch:input>
+        <batch:process-records>
+            <batch:step name="transformActivityRecords" accept-policy="ALL">
+                <flow-ref name="processActivityRecord" doc:name="process Activity record"/>
+            </batch:step>
+            <batch:step name="generateSfdcCsvFile">
+                <batch:commit streaming="true" doc:name="Batch Commit">
+                    <data-mapper:transform config-ref="List_Event__To_CSV" doc:name="List&lt;Event&gt; To CSV"/>
+			        <file:outbound-endpoint path="/opt/files/output" outputPattern="#[message.inboundProperties.originalFilename.replaceAll('.csv', '')] - #[server.dateTime.format('yyyy-mm-dd hh-mm')].csv" responseTimeout="10000" doc:name="File"/>
+                </batch:commit>
+            </batch:step>
+        </batch:process-records>
+        <batch:on-complete>
+            <logger message="Total Records Loaded: #[message.payload.getLoadedRecords()], Failed Records: #[message.payload.getFailedRecords()], Processing time: #[message.payload.getElapsedTimeInMillis()]" level="INFO" doc:name="Logger"/>
+        </batch:on-complete>
+    </batch:job>
+    <flow name="processActivityRecord" doc:name="processActivityRecord">
+        <enricher doc:name="Message Enricher">
+            <sfdc:query-single config-ref="Salesforce" query="SELECT Id FROM Event WHERE LX_Siebel_ID__c = '#[payload.LX_Siebel_ID__c]'" doc:name="See if Event Exists"/>
+            <enrich source="#[map-payload:Id]" target="#[payload.Id]"/>
+        </enricher>
+        <choice doc:name="Event Exists?">
+            <when expression="#[payload.Id &gt; ' ']">
+                <expression-component doc:name="Update Vars"><![CDATA[payload.operation = 'Update';
+]]></expression-component>
+            </when>
+            <otherwise>
+                <enricher doc:name="Message Enricher">
+                    <sfdc:query-single config-ref="Salesforce" query="SELECT Id, Name FROM #[payload.ParentObjectType] WHERE LX_Siebel_ID__c = '#[payload['ParentSiebelId']]'" doc:name="Lookup Parent SFDC ID"/>
+                    <enrich source="#[map-payload:Name]" target="#[payload['ParentName']]"/>
+                    <enrich source="#[map-payload:Id]" target="#[payload['WhatId']]"/>
+                </enricher>
+                <expression-component doc:name="Update Vars"><![CDATA[payload.operation = 'Insert';
+
+
+]]></expression-component>
+            </otherwise>
+        </choice>
+        <expression-component doc:name="Massage fields for SFDC"><![CDATA[payload.DurationInMinutes = (payload.EndDateTime.getTimeInMillis() - payload.StartDateTime.getTimeInMillis() )/ 1000 / 60;
+
+if ( payload.DurationInMinutes < 0 ) { payload.DurationInMinutes * -1 };]]></expression-component>
+        <logger message="#[payload.operation] of Event #[payload.Id] for #[payload.ParentObjectType](payload.ParentSiebelId)" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
